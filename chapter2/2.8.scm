@@ -1,0 +1,6 @@
+(define (sub-interval a b)
+  (let ((p1 (- (lower-bound a) (upper-bound b)))
+		(p2 (- (upper-bound a) (lower-bound b))))
+	(make-interval (min p1 p2) (max p1 p2))
+	)
+  )
