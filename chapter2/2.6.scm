@@ -24,7 +24,6 @@
 ;; gheneral addition
 ;; gheneral form seems to be: (define n (lambda (f) (lambda (x) (f (f (f....n times x))))))
 
-(define (+ m n)
-  ((m f) ((n f) x))
+(define (+ n m)
+  (lambda (f) (lambda (x) ((n f) ((m f) x))))
   )
-

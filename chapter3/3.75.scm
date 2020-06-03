@@ -1,0 +1,5 @@
+(define (make-zero-crossings input-stream last-value last-smoothed-value)
+  (let ((avpt (/ (+ (stream-car input-stream) last-value) 2)))
+    (cons-stream (sign-change-detector avpt last-smoothed-value)
+                 (make-zero-crossings (stream-cdr input-stream)
+                                      avpt))))

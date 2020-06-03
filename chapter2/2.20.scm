@@ -12,8 +12,12 @@
   (itr lis (remainder (car lis) 2))
   )
 
+(define (same-parity-real . lis)
+  (same-parity lis))
+
 (define input (list 4 2 3 4 5 56 88))
 (same-parity input)
+(same-parity-real 4 2 3 4 5 56 88)
 
 
 

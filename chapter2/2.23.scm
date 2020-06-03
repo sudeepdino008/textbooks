@@ -1,13 +1,9 @@
-(define (for-each proc lis)
-  (if (null? lis)
-	  nil
-	  (
-	   (proc (car lis))
-	   (for-each proc (cdr lis))
-	   )
-	  )
-  )
 
+(define (for-each proc lis)
+  (cond ((null? lis) (newline))
+		(else (let () (proc (car lis)) (for-each proc (cdr lis))))
+		)
+  )
 
 (for-each (lambda (x)
 			(newline)

@@ -88,4 +88,3 @@
 ;; when calculating (r1r2/(r1+r2)), the variation in the value of say r1 is accounted twice, that is the numerator r1 can be equal to lower bound, while denominator r1 can be equal to upper bound. The variation must be accounted for only once. 
 ;; for the above reason Eva is right. 
 
-
