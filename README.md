@@ -7,3 +7,6 @@ solutions to exercise in Structure and Interpretation of Computer Programs (http
 
 ;; C-x C-e to evluate expressions 
 
+
+Chapter 4 exercises often rely on new constructs you're building in the evaluator and won't work with normal MIT-Scheme.
+You should run the evaluator (evaluator.scm) and then give the solutions as input to the evaluator. 
