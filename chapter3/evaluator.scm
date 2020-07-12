@@ -1,6 +1,6 @@
 ;; metacircular evaluator from sicp
 
-;; support for delayed streams (no memoization)
+;; support for delayed streams (with memoization)
 ;; analyze style evaluation
 
 
@@ -18,6 +18,7 @@
   )
 
 (define apply-in-underlying-scheme apply)
+
 
 (define (let? exp) (tagged-list? exp 'let))
 
@@ -43,15 +44,15 @@
   (internal (cadr exp))
   )
 
-(define (make-lambda-combination lambda-dec expressions)
-  (cons lambda-dec expressions)
-  )
-
 (define (let->combination exp)
   (make-lambda-combination
    (make-lambda (let-variables exp) (let-body exp))
    (let-expressions exp))
   )
+
+(define (make-let expressions body)
+  (list 'let expressions body))
+
 
 
 (define (self-evaluating? exp)
@@ -90,12 +91,20 @@
     (make-lambda (cdadr exp)
                  (cddr exp))))
 
+
+
+
 (define (lambda? exp) (tagged-list? exp 'lambda))
 (define (lambda-parameters exp) (cadr exp))
 (define (lambda-body exp) (cddr exp))
 
 (define (make-lambda parameters body)
   (cons 'lambda (cons parameters body)))
+
+(define (make-lambda-combination lambda-dec expressions)
+  (cons lambda-dec expressions)
+  )
+
 
 (define (if? exp) (tagged-list? exp 'if))
 (define (if-predicate exp) (cadr exp))
@@ -166,7 +175,7 @@
 ;; stream related functions
 (define (cons-stream? exp) (tagged-list? exp 'cons-stream))
 (define (stream-car exp) (cadr exp))
-(define (stream-cdr exp) (make-lambda '() (cddr exp)))
+(define (stream-cdr exp) (memoize-exp (cddr exp)))
 
 (define (stream-car? exp) (tagged-list? exp 'stream-car))
 (define (stream-cdr? exp) (tagged-list? exp 'stream-cdr))
@@ -174,7 +183,36 @@
 (define (cons-stream->cons exp)
   (list 'cons (stream-car exp) (stream-cdr exp)))
 
+(define (delay? exp) (tagged-list? exp 'delay))
+(define (delay->memo-proc exp)
+  (memoize-exp (cadr exp))
+  )
 
+(define (memoize-exp exp)
+  
+  (define force-exp (make-lambda '() exp))
+  (define result-set (list 'set! 'result (list force-exp)))
+  (define already-run-set '(set! already-run? true))
+  
+  (define begin-exp (make-begin (list result-set already-run-set 'result)))
+  (define if-exp (make-if 'already-run? 'result begin-exp))
+  (define outer-lambda (make-lambda '() (list if-exp)))
+  (define let-exp (make-let (list '(already-run? false) '(result false))
+                            outer-lambda))
+  ;;   (debug "delay->memo-proc:" let-exp)
+  ;; (debug "delay:if-exp" if-exp)
+  ;; (debug "delay:outer-lamda" outer-lambda)
+  ;; (debug "delay:force-exp" force-exp)
+
+  let-exp
+  )
+
+(define (force? exp) (tagged-list? exp 'force))
+(define (analyze-force exp)
+  (let ((aexp (analyze (cadr exp))))
+    (lambda (env)
+      (execute-application (aexp env) '()))))
+      
 ;; environment realted functions
 
 (define (enclosing-environment env) (cdr env))
@@ -215,7 +253,7 @@
               (frame-values frame)))))
   (env-loop env))
 
-(define (set-variable-value! var env)
+(define (set-variable-value! var val env)
   (define (env-loop env)
     (define (scan vars vals)
       (cond ((null? vars)
@@ -244,7 +282,7 @@
 (define (eval exp env) ((analyze exp) env))
 
 (define (analyze exp)
-  ;;(debug "in analyze:" exp)
+  (debug "in analyze:" exp)
   (cond ((self-evaluating? exp) (analyze-self-evaluating exp))
         ((variable? exp) (analyze-variable exp))
         ((quoted? exp) (analyze-quoted exp))
@@ -253,6 +291,8 @@
         ((if? exp) (analyze-if exp))
         ((let? exp) (analyze (let->combination exp)))
         ((cons-stream? exp) (analyze (cons-stream->cons exp)))
+        ((delay? exp) (analyze (delay->memo-proc exp)))
+        ((force? exp) (analyze-force exp))
         ((stream-cdr? exp) (analyze-stream-cdr exp))
         ((stream-car? exp) (analyze-stream-car exp))
         ((lambda? exp) (analyze-lambda exp))
@@ -330,15 +370,17 @@
 
 (define (analyze-variable exp)
   (debug "variable:" exp)
-  (lambda (env) (lookup-variable-value exp env))
+  (lambda (env)
+    (debug "analyze-variablei")
+    (lookup-variable-value exp env))
   )
 
 (define (analyze-assignment exp)
   (let ((right (analyze (assignment-value exp)))
         (var (assignment-variable exp)))
-    (lambda (env) 
-      (set-variable-value! var (right env) env))
-    'ok))
+    (lambda (env)
+      (set-variable-value! var (right env) env)
+      'ok)))
 
 (define (analyze-definition exp)
   (let ((right (analyze (define-value exp)))
@@ -429,10 +471,12 @@
 ;; (trace analyze-stream-cdr)
 ;; (trace analyze)
 ;; (trace analyze-application)
+;; (trace execute-application)
 ;; (trace apply-primitive-procedure)
 ;; (trace stream-car-arguments)
-;; (trace lookup-variable-value)
-;; (trace operator)
-;; (trace operands)
-;;(trace user-print)
+;;  (trace lookup-variable-value)
+;;  (trace analyze-force)
+;;  (trace delay?)
+;; (trace delay->memo-proc)
+;;(trace stream-cdr)
 (driver-loop)
