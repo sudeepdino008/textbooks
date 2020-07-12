@@ -60,7 +60,7 @@
     (if (= (car sx) (car sy))
         (if (= (cdr sx) (cdr sy)) true false)
         false))
-  
+
   (let ((w1 (weight (stream-car s1)))
         (w2 (weight (stream-car s2))))
     (cond ((cons-car-equal (stream-car s1) (stream-car s2)) (compare-streams s1 (stream-cdr s2) weight))
@@ -76,7 +76,7 @@
 (define ps (pair-series weight-b))
 (define ramanujan-numbers (compare-streams ps ps weight-b))
 
-(stream-print ramanujan-numbers 5)
+(stream-print ramanujan-numbers 20)
 
 
 
