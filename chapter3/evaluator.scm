@@ -1,6 +1,7 @@
 ;; metacircular evaluator from sicp
 
-;; support for delayed streams (with memoization)
+;; support for cons-stream: delayed streams (with memoization)
+;; delay and force support: with memoization
 ;; analyze style evaluation
 
 
@@ -18,7 +19,6 @@
   )
 
 (define apply-in-underlying-scheme apply)
-
 
 (define (let? exp) (tagged-list? exp 'let))
 
@@ -175,7 +175,7 @@
 ;; stream related functions
 (define (cons-stream? exp) (tagged-list? exp 'cons-stream))
 (define (stream-car exp) (cadr exp))
-(define (stream-cdr exp) (memoize-exp (cddr exp)))
+(define (stream-cdr exp) (memoize-exp (caddr exp)))
 
 (define (stream-car? exp) (tagged-list? exp 'stream-car))
 (define (stream-cdr? exp) (tagged-list? exp 'stream-cdr))
@@ -189,8 +189,7 @@
   )
 
 (define (memoize-exp exp)
-  
-  (define force-exp (make-lambda '() exp))
+  (define force-exp (make-lambda '() (list exp)))
   (define result-set (list 'set! 'result (list force-exp)))
   (define already-run-set '(set! already-run? true))
   
@@ -199,11 +198,11 @@
   (define outer-lambda (make-lambda '() (list if-exp)))
   (define let-exp (make-let (list '(already-run? false) '(result false))
                             outer-lambda))
-  ;;   (debug "delay->memo-proc:" let-exp)
-  ;; (debug "delay:if-exp" if-exp)
-  ;; (debug "delay:outer-lamda" outer-lambda)
-  ;; (debug "delay:force-exp" force-exp)
-
+     (debug "delay->memo-proc:" let-exp)
+   (debug "delay:if-exp" if-exp)
+   (debug "delay:outer-lamda" outer-lambda)
+   (debug "delay:force-exp" force-exp)
+   (debug "delay:" exp)
   let-exp
   )
 
@@ -313,7 +312,6 @@
 (define (analyze-stream-cdr exp)
   (let ((body (analyze (stream-car-arguments exp))))
     (lambda (env)
-      ;;(display body)
       (execute-application (cdr (body env)) '())
       )
     )
@@ -369,9 +367,7 @@
     (lambda (env) qval)))
 
 (define (analyze-variable exp)
-  (debug "variable:" exp)
   (lambda (env)
-    (debug "analyze-variablei")
     (lookup-variable-value exp env))
   )
 
