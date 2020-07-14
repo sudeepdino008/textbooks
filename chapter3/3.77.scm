@@ -35,14 +35,25 @@
 
 ;;;;;;;;
 
-(define (integral delayed-integrand initial-value dt)
-  (define int
-    (cons-stream initial-value
-                 (let ((integrand (force delayed-integrand)))
-                   (begin (display "integral")
-                          (stream-add (stream-scale integrand dt) int)))))
-  int)
+;; (define (integral delayed-integrand initial-value dt)
+;;   (define int
+;;     (cons-stream initial-value
+;;                  (let ((integrand (force delayed-integrand)))
+;;                    (begin (display "integral")
+;;                           (stream-add (stream-scale integrand dt) int)))))
+;;   int)
 
+(define (integral delayed-integrand initial-value dt)
+  (cons-stream
+   initial-value
+   (let ((integrand (force delayed-integrand)))
+     (if (stream-null? integrand)
+         'the-empty-stream
+         (integral (delay (stream-cdr integrand))
+                   (+ (* dt (stream-car integrand))
+                      initial-value)
+                   dt))))
+  )
 
 
 (define (solve f y0 dt)
@@ -51,4 +62,4 @@
   y)
 
 ;; running 
-(stream-ref (solve (lambda (y) y) 1 0.001) 5)
+(stream-ref (solve (lambda (y) y) 1 0.001) 1000)
