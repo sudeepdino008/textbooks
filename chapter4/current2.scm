@@ -1,8 +1,11 @@
 ;; metacircular evaluator from sicp
 
-;; support for cons-stream: delayed streams (1bwith memoization)
+;; support for cons-stream: delayed streams
 ;; delay and force support: with memoization
 ;; analyze style evaluation
+;; let* support
+
+;; optimizations to be added: strictness modifiers in functions (Exercise 4.31)
 
 
 (define (debug . args)
@@ -21,6 +24,7 @@
 (define apply-in-underlying-scheme apply)
 
 (define (let? exp) (tagged-list? exp 'let))
+(define (let*? exp) (tagged-list? exp 'let*))
 
 (define (let-variables exp)
   (define (internal lis)
@@ -52,6 +56,19 @@
 
 (define (make-let expressions body)
   (list 'let expressions body))
+
+(define (let*->nested-lets exp)
+  (define (let-assignments exp) (cadr exp))
+  (define (internal assignments body)
+    (if (eq? assignments '()) (car body)
+        (make-let (list (car assignments))
+                  (internal (cdr assignments) body))
+        )
+    )
+
+  (internal (let-assignments exp) (let-body exp))
+  )
+
 
 
 
@@ -289,6 +306,7 @@
         ((definition? exp) (analyze-definition exp))
         ((if? exp) (analyze-if exp))
         ((let? exp) (analyze (let->combination exp)))
+        ((let*? exp) (analyze (let*->nested-lets exp)))
         ((cons-stream? exp) (analyze (cons-stream->cons exp)))
         ((delay? exp) (analyze (delay->memo-proc exp)))
         ((force? exp) (analyze-force exp))

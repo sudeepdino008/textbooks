@@ -84,3 +84,10 @@
   )
 
 (let*->nested-lets '(let* ((var1 exp1) (var2 exp2) (var3 exp3)) (body)))
+
+
+
+
+
+;; or using the evaluator
+(let* ((var1 2) (var2 (+ var1 1))) (+ var1 var2)) ;;expected 5

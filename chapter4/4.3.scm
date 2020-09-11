@@ -18,10 +18,10 @@
 
 ;; check? is suppose to be comprehensive, i.e. it should not depend on truth/false-hood of earlier other check? implementations.
 
-;; quoted
-(define install-module
+;; install module for quoted expressions
+(define install-quoted-package
   (define check? quoted?)
-  (define (execute exp env) (test-of-quotation exp))
+  (define (execute exp env) (text-of-quotation exp))
 
   (put 'check? '(quoted) check?)
   (put 'execute '(quoted) execute)
@@ -32,7 +32,9 @@
   (define (get-execute-procedure tag-list)
     (cond ((null? tag-list) (error "not found"))
           (((get 'check? (car tag-list)) exp) (get 'execute (car tag-list)))
-          (else (get-execute (cdr tag-list))))
+          (else (get-execute-procedure (cdr tag-list))))
     )
+
+  ((get-execute-procedure registry) exp env)
   )
 

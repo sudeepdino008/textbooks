@@ -1,0 +1,33 @@
+;;before distinct:5^5=3125
+;;after distinct : 5!=120
+
+
+  (let ((fletcher (amb 1 2 3 4 5)))
+    (define (require exp) (if (not exp)
+                              (amb)))
+    (define (abs x) (if (< x 0) (- x) x))
+    (require (not (= fletcher 5)))
+    (require (not (= fletcher 1)))
+    (let ((cooper (amb 1 2 3 4 5)))
+      (require (not (= cooper 1)))
+      (require (not (= (abs (- fletcher cooper)) 1)))
+      (require (not (= fletcher cooper)))
+      (let ((miller (amb 1 2 3 4 5)))
+        (require (> miller cooper))
+        (require (not (= miller cooper)))
+        (require (not (= miller fletcher)))
+        (let ((smith (amb 1 2 3 4 5)))
+          (require (not (= (abs (- smith fletcher)) 1)))
+          (require (not (= smith cooper)))
+          (require (not (= smith fletcher)))
+          (require (not (= smith miller)))
+          (let ((baker (amb 1 2 3 4 5)))
+            (require (not (= baker 5)))
+            (require (not (= baker cooper)))
+            (require (not (= baker fletcher)))
+            (require (not (= baker miller)))
+            (require (not (= baker smith)))
+
+            (list (list 'baker baker) (list 'cooper cooper)
+                  (list 'fletcher fletcher) (list 'miller miller)
+                  (list 'smith smith)))))))
