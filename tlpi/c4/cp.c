@@ -7,6 +7,10 @@
 #define BATCH_SIZE 1000
 
 // ./current data/file_with_holes fwh_c
+// load the source bytes into memory, and then write a non-null segment chunk or null segment chunk.
+// alteratively (and much better) would be to use SEEK_HOLE to directly jump to the next non-null or null
+// character containing offset. This way you don't load stuff into memory + don't traverse on all the 
+// characters. 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         usageErr("\n%s <source_file_path> <destination_file_path>\n", argv[0]);
