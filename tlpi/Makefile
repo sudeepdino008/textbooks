@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-current_file = c4/cp.c
+current_file = c5/dup.c
 commons = lib/error_functions.c lib/get_num.c
 
 current : $(current_file) $(commons)
