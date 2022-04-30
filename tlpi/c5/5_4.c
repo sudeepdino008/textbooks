@@ -10,6 +10,11 @@ int dup_fd(int fd) {
 }
 
 int dup2_fd(int oldfd, int newfd) {
+  int fd = fcntl(oldfd, F_GETFD);
+  if (fd == -1) { 
+    errno = EBADF;
+    return -1;
+  }
   if (oldfd == newfd) {
     return newfd;
   }
@@ -22,7 +27,7 @@ int dup2_fd(int oldfd, int newfd) {
 
   if (status != newfd) {
     close(status);
-    errno = EBUSY;
+    errno = EBUSY;  // or some new error
     return -1;
   }
 }
