@@ -11,3 +11,6 @@ $ gdb current      # START gdb on the executable
 
 
 ```
+
+- to view program near the current frame, use `list`
+- view addresses in decimal: `p/d ptr`
