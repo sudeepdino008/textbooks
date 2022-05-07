@@ -13,11 +13,7 @@ typedef struct freeL {
 freeL* head = NULL;
 
 static const int LEN_SIZE = sizeof(long int);
-static const int ENTRY_SIZE_FIXED = LEN_SIZE + 2 * sizeof(void*);
-
-bool can_fit(freeL* entry, long int size) {
-  return (entry->len - size) > 0;
-}
+static const int FREE_L_SIZE = LEN_SIZE + 2 * sizeof(void*);
 
 void pop_from_free_list(freeL* entry) {
   if (entry->previous == NULL) {
@@ -38,18 +34,18 @@ void* c_malloc(long int size) {
   assert(sizeof(void*) == sizeof(long int));
   // production malloc is page-addressed, rather than relying on byte
   // addressing
-  long int ENTRY_SIZE = size + ENTRY_SIZE_FIXED;
-  printf("ENTRY_SIZE: %ld\n", ENTRY_SIZE);
+  long int blob_size = size + FREE_L_SIZE;
+  printf("ENTRY_SIZE: %ld\n", blob_size);
 
   if (head == NULL) {
     printf("sbrk entry newly allocated:and pb: %10p\n", sbrk(0));
 
-    freeL* entry = sbrk(ENTRY_SIZE);
+    freeL* entry = sbrk(blob_size);
     printf("sbrk entry newly allocated: %10p and pb: %10p\n", entry, sbrk(0));
     if (entry == NULL) {
       return NULL;
     }
-    entry->len = ENTRY_SIZE - LEN_SIZE;
+    entry->len = blob_size - LEN_SIZE;
     entry->previous = entry->next = NULL;
     return &(entry->previous);  // skip 'len'
   }
@@ -70,13 +66,13 @@ void* c_malloc(long int size) {
 
   if (best_candidate == NULL) {
     // no slot available big enough to fit `size`. Adjust brk
-    freeL* new_slot = sbrk(ENTRY_SIZE);
+    freeL* new_slot = sbrk(blob_size);
     printf("sbrk head newly allocated (bc): %10p and pg: %10p\n", new_slot,
            sbrk(0));
     if (new_slot == NULL) {
       return NULL;
     }
-    new_slot->len = ENTRY_SIZE - LEN_SIZE;
+    new_slot->len = blob_size - LEN_SIZE;
 
     return &(new_slot->previous);
   }
@@ -109,13 +105,14 @@ void c_free(void* ptr) {
     void* program_break = sbrk(0);
 
     for (freeL* entry = head; entry != NULL; entry = entry->next) {
-      if (program_break == ((void*)entry + LEN_SIZE + entry->len)) {
+      void* blob_end_addr = ((void*)entry + LEN_SIZE + entry->len);
+      if (program_break == blob_end_addr) {
         // release this from free list
         pop_from_free_list(entry);
         found = true;
-        int ENTRY_SIZE = LEN_SIZE + entry->len;
-        void* loc = sbrk(-ENTRY_SIZE);
-        printf("new location after shrink: %10p and %d\n", sbrk(0), ENTRY_SIZE);
+        int blob_size = LEN_SIZE + entry->len;
+        void* loc = sbrk(-blob_size);
+        printf("new location after shrink: %10p and %d\n", sbrk(0), blob_size);
         break;
       }
     }
