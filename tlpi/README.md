@@ -1,3 +1,10 @@
+
+## Running the programs
+- edit the Makefile to have the program you want to run.
+- `make clean current`, then you can do `./current` etc.
+
+
+## gdb debugging
 - compile the c program with `-g` option to have the debugging symbols in the executable.
 
 
