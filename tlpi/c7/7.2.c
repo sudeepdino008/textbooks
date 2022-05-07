@@ -4,18 +4,18 @@
 #include <stdlib.h>
 #include "../lib/tlpi_hdr.h"
 
-typedef struct freeL {
-  long int len;
-  struct freeL* previous;
-  struct freeL* next;
-} freeL;
+typedef struct free_l {
+  size_t chunk_size;
+  struct free_l* previous;
+  struct free_l* next;
+} free_l;
 
-freeL* head = NULL;
+free_l* head = NULL;
 
-static const int LEN_SIZE = sizeof(long int);
-static const int FREE_L_SIZE = LEN_SIZE + 2 * sizeof(void*);
+static const size_t LEN_SIZE = sizeof(long int);
+static const size_t FREE_L_SIZE = LEN_SIZE + 2 * sizeof(void*);
 
-void pop_from_free_list(freeL* entry) {
+void pop_from_free_list(free_l* entry) {
   if (entry->previous == NULL) {
     head = entry->next;
   } else {
@@ -27,34 +27,37 @@ void pop_from_free_list(freeL* entry) {
   }
 }
 
-void* c_malloc(long int size) {
+void* c_malloc(size_t size) {
+  // real malloc has caching allocator for small (<= 64 bytes by default) sizes,
+  // which maintains pools of quickly recycled chunks no validation on size this
+  // implementation is **not** thread safe
   printf("\n\n");
   // assuming sizeof(long int) and sizeof(void*) is the same.
   // this would break on systems where it is different
-  assert(sizeof(void*) == sizeof(long int));
+  assert(sizeof(void*) == sizeof(size_t));
   // production malloc is page-addressed, rather than relying on byte
   // addressing
-  long int blob_size = size + FREE_L_SIZE;
+  size_t blob_size = size + FREE_L_SIZE;
   printf("ENTRY_SIZE: %ld\n", blob_size);
 
   if (head == NULL) {
     printf("sbrk entry newly allocated:and pb: %10p\n", sbrk(0));
 
-    freeL* entry = sbrk(blob_size);
+    free_l* entry = sbrk(blob_size);
     printf("sbrk entry newly allocated: %10p and pb: %10p\n", entry, sbrk(0));
     if (entry == NULL) {
       return NULL;
     }
-    entry->len = blob_size - LEN_SIZE;
+    entry->chunk_size = blob_size - LEN_SIZE;
     entry->previous = entry->next = NULL;
-    return &(entry->previous);  // skip 'len'
+    return &entry->previous;  // skip 'chunk_size'
   }
 
   // best fit strategy
-  freeL* best_candidate = NULL;
+  free_l* best_candidate = NULL;
   long int best_gap = LONG_MAX;
-  for (freeL* curr = head; curr != NULL; curr = curr->next) {
-    int hole_sz = curr->len - size;
+  for (free_l* curr = head; curr != NULL; curr = curr->next) {
+    int hole_sz = curr->chunk_size - size;
     if (hole_sz < best_gap && hole_sz >= 0) {
       best_gap = hole_sz;
       best_candidate = curr;
@@ -66,21 +69,21 @@ void* c_malloc(long int size) {
 
   if (best_candidate == NULL) {
     // no slot available big enough to fit `size`. Adjust brk
-    freeL* new_slot = sbrk(blob_size);
+    free_l* new_slot = sbrk(blob_size);
     printf("sbrk head newly allocated (bc): %10p and pg: %10p\n", new_slot,
            sbrk(0));
     if (new_slot == NULL) {
       return NULL;
     }
-    new_slot->len = blob_size - LEN_SIZE;
+    new_slot->chunk_size = blob_size - LEN_SIZE;
 
-    return &(new_slot->previous);
+    return &new_slot->previous;
   }
 
   pop_from_free_list(best_candidate);
   printf("best_candidate: %10p\n", best_candidate);
 
-  return &(best_candidate->previous);
+  return &best_candidate->previous;
 }
 
 void c_free(void* ptr) {
@@ -91,7 +94,7 @@ void c_free(void* ptr) {
 
   // return slot to the free list
   ptr -= LEN_SIZE;
-  freeL* entry_ptr = (freeL*)ptr;
+  free_l* entry_ptr = (free_l*)ptr;
   printf("entry location to free: %10p\n", ptr);
   entry_ptr->previous = NULL;
   entry_ptr->next = head;
@@ -104,19 +107,22 @@ void c_free(void* ptr) {
     found = false;
     void* program_break = sbrk(0);
 
-    for (freeL* entry = head; entry != NULL; entry = entry->next) {
-      void* blob_end_addr = ((void*)entry + LEN_SIZE + entry->len);
+    for (free_l* entry = head; entry != NULL; entry = entry->next) {
+      void* blob_end_addr = ((void*)entry + LEN_SIZE + entry->chunk_size);
       if (program_break == blob_end_addr) {
         // release this from free list
         pop_from_free_list(entry);
         found = true;
-        int blob_size = LEN_SIZE + entry->len;
+        int blob_size = LEN_SIZE + entry->chunk_size;
         void* loc = sbrk(-blob_size);
         printf("new location after shrink: %10p and %d\n", sbrk(0), blob_size);
         break;
       }
     }
   } while (found);
+
+  // another optimization is to merge continuous memory blocks (when they get
+  // large enough) in the middle of the free list
 }
 
 int main(int argc, char* argv[]) {
