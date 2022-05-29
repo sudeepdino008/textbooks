@@ -1,0 +1,58 @@
+execve("/usr/bin/tail", ["tail", "data/rand_man.txt"], 0x7ffc65e6f288 /* 34 vars */) = 0
+brk(NULL)                               = 0x558176879000
+arch_prctl(0x3001 /* ARCH_??? */, 0x7ffc5585b1d0) = -1 EINVAL (Invalid argument)
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=30580, ...}) = 0
+mmap(NULL, 30580, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f116ea0b000
+close(3)                                = 0
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\360A\2\0\0\0\0\0"..., 832) = 832
+pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+pread64(3, "\4\0\0\0\20\0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0", 32, 848) = 32
+pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0\237\333t\347\262\27\320l\223\27*\202C\370T\177"..., 68, 880) = 68
+fstat(3, {st_mode=S_IFREG|0755, st_size=2029560, ...}) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f116ea09000
+pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+pread64(3, "\4\0\0\0\20\0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0", 32, 848) = 32
+pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0\237\333t\347\262\27\320l\223\27*\202C\370T\177"..., 68, 880) = 68
+mmap(NULL, 2037344, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f116e817000
+mmap(0x7f116e839000, 1540096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x22000) = 0x7f116e839000
+mmap(0x7f116e9b1000, 319488, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x19a000) = 0x7f116e9b1000
+mmap(0x7f116e9ff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e7000) = 0x7f116e9ff000
+mmap(0x7f116ea05000, 13920, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f116ea05000
+close(3)                                = 0
+arch_prctl(ARCH_SET_FS, 0x7f116ea0a580) = 0
+mprotect(0x7f116e9ff000, 16384, PROT_READ) = 0
+mprotect(0x558174fab000, 4096, PROT_READ) = 0
+mprotect(0x7f116ea40000, 4096, PROT_READ) = 0
+munmap(0x7f116ea0b000, 30580)           = 0
+brk(NULL)                               = 0x558176879000
+brk(0x55817689a000)                     = 0x55817689a000
+openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=3035952, ...}) = 0
+mmap(NULL, 3035952, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f116e531000
+close(3)                                = 0
+openat(AT_FDCWD, "data/rand_man.txt", O_RDONLY) = 3
+fstat(3, {st_mode=S_IFREG|0664, st_size=61534, ...}) = 0
+lseek(3, 0, SEEK_CUR)                   = 0
+lseek(3, 0, SEEK_END)                   = 61534
+lseek(3, 57344, SEEK_SET)               = 57344
+read(3, "N_CLOSE_NOWRITE)\n               "..., 4190) = 4190
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x4), ...}) = 0
+write(1, "       inotifywait(1),   inotify"..., 134) = 134
+write(1, "       stat(2), fanotify(7)\n", 28) = 28
+write(1, "\n", 1)                       = 1
+write(1, "       Documentation/filesystems"..., 77) = 77
+write(1, "\n", 1)                       = 1
+write(1, "COLOPHON\n", 9)               = 9
+write(1, "       This page is part of rele"..., 134) = 134
+write(1, "       bugs, and the latest vers"..., 105) = 105
+write(1, "\n", 1)                       = 1
+write(1, "Linux                           "..., 134) = 134
+read(3, "", 0)                          = 0
+close(3)                                = 0
+close(1)                                = 0
+close(2)                                = 0
+exit_group(0)                           = ?
++++ exited with 0 +++
