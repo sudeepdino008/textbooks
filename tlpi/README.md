@@ -21,3 +21,13 @@ $ gdb current      # START gdb on the executable
 
 - to view program near the current frame, use `list`
 - view addresses in decimal: `p/d ptr`
+
+
+## tracing programs
+- tracing is a cool way to explore the programs you wrote, or to explore existing 
+linux programs (say for the purpose of comparing to your implementation)
+
+```bash
+strace -o out.trace ./current data/para.txt
+strace -o out2.trace tail -f data/para.txt
+```
