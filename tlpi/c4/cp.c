@@ -9,7 +9,7 @@
 // ./current data/file_with_holes fwh_c
 // load the source bytes into memory, and then write a non-null segment chunk or
 // null segment chunk. alteratively (and much better) would be to use SEEK_HOLE
-// to directly jump to the next non-null or null character containing offset.
+// and SEEK_DATA to directly jump to the next null or non-null character offset.
 // This way you don't load stuff into memory + don't traverse on all the
 // characters.
 int main(int argc, char* argv[]) {
