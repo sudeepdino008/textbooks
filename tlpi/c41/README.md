@@ -13,4 +13,3 @@ total 884K
 -rwxrwxr-x 1 sudeep sudeep 852K Jun 23 17:39 static_out
 drwxrwxr-x 2 sudeep sudeep 4.0K Jun 23 17:34 testing
 ```
-
